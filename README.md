@@ -1,39 +1,38 @@
-# @metalsmith/js-bundle
-
-A metalsmith plugin that bundles your JS using [esbuild](https://esbuild.github.io) with sensible defaults (and [babel](https://babeljs.io) for ES5)
-
-[![metalsmith: core plugin][metalsmith-badge]][metalsmith-url]
-[![npm: version][npm-badge]][npm-url]
-[![ci: build][ci-badge]][ci-url]
-[![code coverage][codecov-badge]][codecov-url]
+[![NPM version][npm-image]][npm-url]
+[![Build Status][build-image]][build-url]
+[![Dependency Status][deps-image]][deps-url]
 [![license: MIT][license-badge]][license-url]
+
+# @pirxpilot/metalsmith-esbuild
+
+Fork of [@metalsmith/js-bundle] without ES5 support.
+
+A metalsmith plugin that bundles your JS using [esbuild](https://esbuild.github.io) with sensible defaults.
 
 ## Features
 
-- Transpiles ESnext to ES6 with esbuild, and falls back on a Babel compatibility layer for ES5
 - Supports most ESbuild options including custom loaders and plugins
-- Available in CommonJS and ESM
 
 ## Installation
 
 NPM:
 
 ```
-npm install @metalsmith/js-bundle
+npm install @pirxpilot/metalsmith-esbuild
 ```
 
 Yarn:
 
 ```
-yarn add @metalsmith/js-bundle
+yarn add @pirxpilot/metalsmith-esbuild
 ```
 
 ## Usage
 
-Pass `@metalsmith/js-bundle` to `metalsmith.use` :
+Pass `@pirxpilot/metalsmith-esbuild` to `metalsmith.use` :
 
 ```js
-const jsBundle = require('@metalsmith/js-bundle')
+const jsBundle = require('@pirxpilot/metalsmith-esbuild')
 
 metalsmith.use(
   jsBundle({
@@ -69,7 +68,7 @@ The paths in the `entries` option should be relative to `metalsmith.directory()`
 
 ### Options
 
-`@metalsmith/js-bundle` provides access to most underlying [esbuild options](https://esbuild.github.io/api/#build-api), with a few notable differences:
+`@pirxpilot/metalsmith-esbuild` provides access to most underlying [esbuild options](https://esbuild.github.io/api/#build-api), with a few notable differences:
 
 The options `absWorkingDir` (=`metalsmith.directory()`), `outdir` (=`metalsmith.destination()`), `write` (=`false`), and `metafile` (=`true`) can not be set, they are determined by the plugin.
 
@@ -83,7 +82,7 @@ You can load assets with any of the [ESbuild loaders](https://esbuild.github.io/
 
 - assets loaded with any loader but the `file` loader will be "embedded" in the resulting JS bundle and removed from the build (=not available for other plugins), increasing bundle size.
 - if you would like to process assets loaded with the `file` loader with other metalsmith plugins (eg [metalsmith-imagemin](https://github.com/ahmadnassri/metalsmith-imagemin))
-  `@metalsmith/js-bundle` needs to be _run first_ and you should not overwrite the default [`assetNames` option](https://esbuild.github.io/api/#asset-names) `[dir]/[name]`.
+  `@pirxpilot/metalsmith-esbuild` needs to be _run first_ and you should not overwrite the default [`assetNames` option](https://esbuild.github.io/api/#asset-names) `[dir]/[name]`.
 
 The [file loader](https://esbuild.github.io/content-types/#external-file) is the loader you need for most large asset types you wouldn't want to bloat your JS bundle with.
 If you want to use inline SVG's, you would set its loader to `text`, while if you prefer loading them in image tags, you could set them to `dataurl` (embedded) or `file` (external).
@@ -105,42 +104,22 @@ metalsmith.use(
 )
 ```
 
-### ES5 transpilation support
-
-ESbuild does not support compiling to ES5 (ie. supporting IE 11 and some older mobile browsers).
-Nevertheless you can specify the `target: 'es5'` option and `@metalsmith/js-bundle` will let ESbuild handle bundling and fall back on Babel to provide a compatibility layer. The side effects of this are a slower and bigger build and currently, no support for source maps. However, you can make the target depend on an environment variable and enjoy sourcemaps in development, eg:
-
-```js
-const isDev = process.env.NODE_ENV === 'development'
-
-metalsmith.use(
-  jsbundle({
-    entries: { index: 'src/index.js' },
-    target: isDev ? 'es6' : 'es5'
-  })
-)
-```
-
-At the moment, passing options to Babel is not supported. A Babel production build will have basic minification, but without further (mangling) optimizations. You could choose to use [metalsmith-uglifyjs](https://github.com/ubenzer/metalsmith-uglifyjs) to further optimize it.
-
-Alternatively you could run `@metalsmith/jsbundle` twice, 1 with target es5, and 1 with higher, and decide with an inline script at run-time which bundle to inject.
-
 ### Debug
 
-To enable debug logs, set `metalsmith.env('DEBUG', '@metalsmith/js-bundle*')` or in `metalsmith.json`: `"env": { "DEBUG": "@metalsmith/js-bundle*" }`.
+To enable debug logs, set `metalsmith.env('DEBUG', '@pirxpilot/metalsmith-esbuild*')` or in `metalsmith.json`: `"env": { "DEBUG": "@pirxpilot/metalsmith-esbuild*" }`.
 You can also pass the live environment variable by running `metalsmith.env('DEBUG', process.env.DEBUG)` or in `metalsmith.json`: `"env": { "DEBUG": "$DEBUG" }`
 
 Alternatively you can set `DEBUG` to `@metalsmith/*` to debug all Metalsmith core plugins.
 
 ### CLI usage
 
-To use this plugin with the Metalsmith CLI, add `@metalsmith/js-bundle` to the `plugins` key in your `metalsmith.json` file:
+To use this plugin with the Metalsmith CLI, add `@pirxpilot/metalsmith-esbuild` to the `plugins` key in your `metalsmith.json` file:
 
 ```json
 {
   "plugins": [
     {
-      "@metalsmith/js-bundle": {
+      "@pirxpilot/metalsmith-esbuild": {
         "entries": {
           "app": "lib/main.js"
         }
@@ -154,13 +133,12 @@ To use this plugin with the Metalsmith CLI, add `@metalsmith/js-bundle` to the `
 
 [MIT](LICENSE)
 
-[npm-badge]: https://img.shields.io/npm/v/@metalsmith/js-bundle.svg
-[npm-url]: https://www.npmjs.com/package/@metalsmith/js-bundle
-[ci-badge]: https://github.com/metalsmith/js-bundle/actions/workflows/test.yml/badge.svg
-[ci-url]: https://github.com/metalsmith/js-bundle/actions/workflows/test.yml
-[metalsmith-badge]: https://img.shields.io/badge/metalsmith-core_plugin-green.svg?longCache=true
-[metalsmith-url]: https://metalsmith.io
-[codecov-badge]: https://img.shields.io/coveralls/github/metalsmith/js-bundle
-[codecov-url]: https://coveralls.io/github/metalsmith/js-bundle
+[@metalsmith/js-bundle]: https://npmjs.org/package/@metalsmith/js-bundle
 [license-badge]: https://img.shields.io/github/license/metalsmith/js-bundle
 [license-url]: LICENSE
+[npm-image]: https://img.shields.io/npm/v/@pirxpilot/metalsmith-esbuild
+[npm-url]: https://npmjs.org/package/@pirxpilot/metalsmith-esbuild
+[build-url]: https://github.com/pirxpilot/metalsmith-esbuild/actions/workflows/check.yaml
+[build-image]: https://img.shields.io/github/workflow/status/pirxpilot/metalsmith-esbuild/check
+[deps-image]: https://img.shields.io/librariesio/release/npm/@pirxpilot/metalsmith-esbuild
+[deps-url]: https://libraries.io/npm/@pirxpilot%2Fmetalsmith-esbuild

@@ -1,8 +1,9 @@
-import { build } from 'esbuild'
-import { relative, extname } from 'path'
-import es5Plugin from './es5'
+const { build } = require('esbuild')
+const { relative } = require('path')
 
 const debugNs = '@metalsmith/js-bundle'
+
+module.exports = initJsBundle
 
 /**
  * @typedef {import('esbuild').BuildOptions} Options
@@ -69,22 +70,13 @@ function normalizeOptions(options = {}, metalsmith, debug) {
  * @returns {import('metalsmith').Plugin}
  */
 function initJsBundle(options = {}) {
-  // esbuild does not support ES5 compilation
-  // to avoid it throw an error, force at least ES6 and let esbuild do all the bundling, then postprocess and minify with babel
-  let babelPostProcess = false
-  if (options.target === 'es5') {
-    babelPostProcess = true
-    options.target = 'es6'
-    options.minify = false
-  }
-
-  return function jsBundle(files, metalsmith, done) {
+  return async function jsBundle(files, metalsmith) {
     const debug = metalsmith.debug(debugNs)
 
     options = normalizeOptions(options, metalsmith, debug)
     if (Object.keys(options.entryPoints).length === 0) {
       debug.warn('No files to process, skipping.')
-      done()
+      return
     }
 
     options.entryPoints = Object.entries(options.entryPoints).reduce((mapped, current) => {
@@ -96,50 +88,34 @@ function initJsBundle(options = {}) {
     debug('Running with options %O', options)
     const sourceRelPath = relative(metalsmith.directory(), metalsmith.source())
 
-    build(options)
-      .then((result) => {
-        debug(
-          'Finished bundling %O',
-          result.outputFiles.map((o) => relative(metalsmith.destination(), o.path))
-        )
+    const result = await build(options)
+    debug(
+      'Finished bundling %O',
+      result.outputFiles.map((o) => relative(metalsmith.destination(), o.path))
+    )
 
-        // first read esbuild metafile to remove the compilation inputs from the build
-        Object.values(result.metafile.outputs).forEach((o) => {
-          if (o.inputs) {
-            metalsmith.match(`${sourceRelPath}/**`, Object.keys(o.inputs)).forEach((input) => {
-              delete files[relative(metalsmith.source(), metalsmith.path(input))]
-            })
-          }
+    // first read esbuild metafile to remove the compilation inputs from the build
+    Object.values(result.metafile.outputs).forEach((o) => {
+      if (o.inputs) {
+        metalsmith.match(`${sourceRelPath}/**`, Object.keys(o.inputs)).forEach((input) => {
+          delete files[relative(metalsmith.source(), metalsmith.path(input))]
         })
+      }
+    })
 
-        result.outputFiles.forEach((file) => {
-          // For in-source files, esbuild returns entries in the format 'build/src/path/to/file.ext'
-          // first we strip the metalsmith.destination()
-          let destPath = relative(metalsmith.destination(), file.path)
+    result.outputFiles.forEach((file) => {
+      // For in-source files, esbuild returns entries in the format 'build/src/path/to/file.ext'
+      // first we strip the metalsmith.destination()
+      let destPath = relative(metalsmith.destination(), file.path)
 
-          // if the file was in-source, we strip the source path part (eg 'src') too.
-          if (destPath.startsWith(sourceRelPath)) {
-            destPath = relative(metalsmith.source(), metalsmith.path(destPath))
-          }
+      // if the file was in-source, we strip the source path part (eg 'src') too.
+      if (destPath.startsWith(sourceRelPath)) {
+        destPath = relative(metalsmith.source(), metalsmith.path(destPath))
+      }
 
-          files[destPath] = {
-            contents: Buffer.from(file.contents.buffer)
-          }
-          if (babelPostProcess && extname(destPath) === '.js') {
-            files[destPath].__babelPostProcess = true
-          }
-        })
-
-        if (babelPostProcess) {
-          es5Plugin()(files, metalsmith, done)
-        } else {
-          done()
-        }
-      })
-      .catch((err) => {
-        done(err)
-      })
+      files[destPath] = {
+        contents: Buffer.from(file.contents.buffer)
+      }
+    })
   }
 }
-
-export default initJsBundle
