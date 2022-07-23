@@ -1,6 +1,6 @@
 {
-  "name": "@metalsmith/js-bundle",
-  "version": "0.1.1",
+  "name": "@pirxpilot/metalsmith-esbuild",
+  "version": "0.0.0",
   "description": "A metalsmith plugin that bundles your JS using esbuild",
   "keywords": [
     "js-bundle",
@@ -8,77 +8,32 @@
     "metalsmith",
     "static-site"
   ],
-  "source": "src/index.js",
-  "main": "lib/index.cjs",
-  "module": "lib/index.js",
-  "type": "module",
-  "exports": {
-    "import": "./lib/index.js",
-    "require": "./lib/index.cjs"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/metalsmith/js-bundle.git"
-  },
+  "main": "index.js",
+  "repository": "pirxpilot/metalsmith-esbuild",
   "files": [
-    "lib/index.cjs",
-    "lib/index.js",
-    "src/index.js",
-    "src/es5.js"
+    "index.js"
   ],
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
   "author": "Kevin Van Lierde (https://webketje.com)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/metalsmith/js-bundle/issues"
-  },
-  "homepage": "https://github.com/metalsmith/js-bundle#readme",
   "devDependencies": {
     "assert-dir-equal": "^1.1.0",
-    "auto-changelog": "^2.4.0",
-    "esbuild-plugin-markdown": "^0.0.3",
-    "esbuild-plugin-toml": "^0.0.1",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "metalsmith": "^2.5.0",
-    "microbundle": "^0.15.0",
-    "mocha": "^9.2.2",
-    "nyc": "^15.1.0",
-    "prettier": "^2.6.2",
-    "release-it": "^15.0.0",
-    "serve": "^13.0.2"
+    "mocha": "~10",
+    "prettier": "^2.6.2"
   },
   "peerDependencies": {
     "metalsmith": "^2.5.0"
   },
   "scripts": {
-    "changelog": "auto-changelog -u --commit-limit false --ignore-commit-pattern '^((dev|chore|ci):|Release)'",
-    "coverage": "nyc report --reporter=text-lcov > ./coverage.info",
-    "format": "prettier --write \"**/*.{yml,md,js,cjs,json}\"",
-    "format:check": "prettier --list-different \"**/*.{yml,md,js,json}\"",
-    "lint": "eslint --fix .",
-    "lint:check": "eslint --fix-dry-run .",
-    "release": "npm run build && release-it .",
-    "build": "microbundle --target node --no-sourcemap -f cjs,esm",
-    "pretest": "npm run build",
-    "test": "nyc mocha -t 5000",
-    "test:debug": "DEBUG=@metalsmith/js-bundle:* npm test",
-    "test:e2e": "serve -l 3000 test/fixtures"
+    "test": "make check"
   },
   "engines": {
     "node": ">=12"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "dependencies": {
-    "@babel/core": "^7.18.5",
-    "@babel/preset-env": "^7.18.2",
-    "esbuild": "^0.14.43"
+    "esbuild": "~0"
   }
 }
