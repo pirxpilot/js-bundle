@@ -20,7 +20,7 @@ function normalizeOptions(options = {}, metalsmith, debug) {
   const isProd = metalsmith.env('NODE_ENV') !== 'development'
   const define = Object.entries(metalsmith.env()).reduce((acc, [name, value]) => {
     // see notes at https://esbuild.github.io/api/#define, string values require explicit quotes
-    acc[`process.env.${name}`] = typeof value === 'string' ? `'${value}'` : value
+    acc[`process.env.${name}`] = `'${value}'`
     return acc
   }, {})
 
